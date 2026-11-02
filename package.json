@@ -1,0 +1,14 @@
+{
+  "name": "dain-follower-tracker",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test",
+    "record": "node scripts/record.mjs",
+    "collect": "node scripts/collect.mjs",
+    "serve": "node scripts/serve.mjs"
+  },
+  "dependencies": {
+    "playwright": "1.64.1"
+  }
+}

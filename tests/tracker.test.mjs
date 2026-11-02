@@ -1,0 +1,16 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {count,day,today,upsert} from '../scripts/lib.mjs';
+import {fetchFollowers} from '../scripts/collect.mjs';
+import {exactNumber,parseFollowerText} from '../scripts/public-page.mjs';
+const entry={date:'2026-11-02',followers:100,source:'manual',recordedAt:'2026-11-02T00:00:00Z'};
+test('정수와 날짜 검증',()=>{assert.equal(count('0'),0);for(const v of ['-1','1.5','1e3','',true])assert.throws(()=>count(v));assert.throws(()=>day('2026-02-30'));});
+test('한국 자정 경계',()=>assert.equal(today(new Date('2026-11-01T15:00:00Z')),'2026-11-02'));
+test('같은 날 중복 보존 및 명시적 수정',()=>{const r=upsert([],entry);assert.equal(upsert(r.rows,{...entry,followers:110}).changed,false);assert.equal(upsert(r.rows,{...entry,followers:110},true).rows[0].followers,110);});
+const env={FB_USER_ACCESS_TOKEN:'SECRET_MUST_NOT_LEAK',FB_CALLER_IG_USER_ID:'123',IG_API_VERSION:'v99.0'};
+test('Business Discovery는 호출자 ID·공식 호스트·인증 헤더 사용',async()=>{assert.equal(await fetchFollowers(env,async(url,options)=>{assert.equal(url.hostname,'graph.facebook.com');assert.equal(url.pathname,'/v99.0/123');assert.equal(url.searchParams.get('fields'),'business_discovery.username(dxineee){username,followers_count}');assert.equal(url.searchParams.has('access_token'),false);assert.equal(options.headers.Authorization,'Bearer '+env.FB_USER_ACCESS_TOKEN);return {ok:true,json:async()=>({business_discovery:{username:'dxineee',followers_count:738}})};}),738);});
+test('API 누락·다른 계정·음수·오류는 0으로 기록하지 않음',async()=>{for(const data of [{},{business_discovery:{username:'other',followers_count:738}},{business_discovery:{username:'dxineee',followers_count:-1}}])await assert.rejects(fetchFollowers(env,async()=>({ok:true,json:async()=>data})));await assert.rejects(fetchFollowers(env,async()=>({ok:false,status:401,json:async()=>({error:{code:190,message:env.FB_USER_ACCESS_TOKEN}})})),e=>e.message.includes('190')&&!e.message.includes(env.FB_USER_ACCESS_TOKEN));await assert.rejects(fetchFollowers(env,async()=>{throw Error(env.FB_USER_ACCESS_TOKEN)}),e=>!e.message.includes(env.FB_USER_ACCESS_TOKEN));});
+test('사용자명으로 쿼리 삽입 금지',async()=>{await assert.rejects(fetchFollowers(env,fetch,{targetUsername:'x){media}'}));});
+test('Instagram Login 직접 경로도 유지',async()=>assert.equal(await fetchFollowers({IG_ACCESS_TOKEN:'secret',IG_USER_ID:'123',IG_API_VERSION:'v99.0'},async(url)=>{assert.equal(url.hostname,'graph.instagram.com');return {ok:true,json:async()=>({id:'123',username:'dxineee',followers_count:738})};},{mode:'official-api'}),738));
+test('공개 페이지의 한글·영문 팔로워 라벨과 정확한 숫자',()=>{assert.equal(parseFollowerText('3 posts\n738 followers\n675 following'),738);assert.equal(parseFollowerText('팔로워\n738\n팔로우\n675'),738);assert.equal(exactNumber('12,345'),12345);assert.equal(parseFollowerText('0 followers'),0);});
+test('축약·팔로잉·누락·상충하는 팔로워 수는 거부',()=>{for(const v of ['1.2K followers','12.3 followers','675 following','Log in','738 followers 999 followers','팔로워 1.2만'])assert.throws(()=>parseFollowerText(v));});
