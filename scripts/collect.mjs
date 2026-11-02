@@ -32,7 +32,7 @@ if(process.argv[1]&&import.meta.url===pathToFileURL(process.argv[1]).href){
  const followers=c.collectionMode==='public-page'
  ?await (await import('./public-page.mjs')).fetchPublicFollowers(c.targetUsername)
  :await fetchFollowers(process.env,fetch,{mode:c.collectionMode,targetUsername:c.targetUsername});
- await save({date:today(),followers,source:c.collectionMode,targetUsername:username(c.targetUsername),recordedAt:new Date().toISOString()});
+ await save({date:today(),followers,source:c.collectionMode,targetUsername:username(c.targetUsername),recordedAt:new Date().toISOString()}, true);
  }
  }catch(e){console.error(e.message);process.exitCode=1;}
 }
