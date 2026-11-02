@@ -2,7 +2,7 @@
 
 대상: https://www.instagram.com/dxineee/
 
-GitHub Actions가 3시간마다 새 브라우저로 공개 프로필을 열고, 팔로워 표시의 정확한 숫자를 읽어 JSON에 저장하고, GitHub Pages 그래프에 반영합니다. 사용자가 개인 계정이어도 됩니다. 기본 경로는 Instagram 계정 로그인·API 토큰·비즈니스 계정을 사용하지 않습니다.
+사용자 PC의 Windows 예약 작업이 3시간마다 새 브라우저로 공개 프로필을 열고, 팔로워 표시의 정확한 숫자를 읽어 GitHub에 전송합니다. GitHub Actions는 테스트와 Pages 배포를 담당합니다. 사용자가 개인 계정이어도 됩니다. 기본 경로는 Instagram 계정 로그인·API 토큰·비즈니스 계정을 사용하지 않습니다.
 
 공식 API가 아닌 웹페이지 수집 방식입니다. 초기 요청에서는 공식 API 우선이었으나, 이후 사용자가 정해진 시간에 공개 페이지를 조회하는 방식을 요청하여 기본 경로를 변경했습니다. 로그인·CAPTCHA·차단 우회, 비공개 정보 접근, 쿠키 재사용, 비밀번호 수집은 구현하지 않습니다. 공개 페이지 접근이 자동 실행 환경에서 허용되지 않으면 수집은 실패합니다. 무료 GitHub Actions에서의 매일 성공을 보장하지 않습니다.
 
@@ -13,7 +13,7 @@ GitHub Actions가 3시간마다 새 브라우저로 공개 프로필을 열고, 
 ## 프로젝트 내용
 
 - config.json: 계정명·수집 방식·수집 및 공개 여부
-- .github/workflows/tracker.yml: 예약·수동 실행, 테스트, 기록 커밋, Pages 배포
+- .github/workflows/tracker.yml: 수동 실행, 테스트, 기록 커밋, Pages 배포 (서버의 Instagram 예약 조회는 제거)
 - scripts/public-page.mjs: Playwright 브라우저로 공개 프로필의 팔로워 표시만 읽음
 - scripts/collect.mjs: 공개 페이지/Business Discovery/Instagram Login 수집 선택
 - scripts/record.mjs: 수동 입력과 명시적인 기존 날짜 수정
@@ -40,7 +40,7 @@ publishDashboard와 Actions 변수 PUBLISH_PAGES를 둘 다 true로 바꿔야 �
 
 ## 수집 방식과 정확도
 
-한국 시간 00:17, 03:17, 06:17, 09:17, 12:17, 15:17, 18:17, 21:17에 하루 8회 실행됩니다 (UTC cron: `17 */3 * * *`). GitHub 예약은 늦어지거나 누락될 수 있으므로 정확한 시각 실행을 보장하지 않습니다. 공개 저장소가 60일 동안 활동이 없으면 예약이 비활성화될 수 있습니다. 워크플로 파일은 기본 브랜치 main에 있어야 합니다.
+사용자 PC의 Windows 작업 스케줄러가 한국 시간 00:17, 03:17, 06:17, 09:17, 12:17, 15:17, 18:17, 21:17에 하루 8회 실행합니다. PC가 켜져 있고 해당 Windows 사용자로 로그인되어 있어야 합니다. 화면 잠금은 가능합니다. PC가 꺼져 있거나 로그아웃되어 있으면 실행되지 않습니다. 절전 등으로 놓친 작업은 Windows가 가능한 시점에 실행할 수 있습니다. GitHub 서버의 예약 조회는 중복과 접근 제한을 피하기 위해 제거했습니다.
 
 팔로워 링크에 정확한 숫자의 title 속성이 있으면 이를 우선 읽습니다. 없으면 프로필 헤더의 followers/팔로워 라벨과 연결된 숫자를 읽습니다. 추천 계정·팔로잉 수는 수집하지 않습니다. 1.2K·1.2만 같은 축약 표시는 임의로 환산하지 않습니다.
 
@@ -125,3 +125,9 @@ collectionMode를 official-api로 설정하고 ownerConsent를 true로 바꿉니
 ## 디자인 업데이트
 
 파스텔 라벤더·민트·살구색과 아이폰 기본 시스템 글꼴을 적용했습니다. 사용자 제공 토땅이 PNG는 HTML에 포함해 별도 업로드가 필요 없습니다. 제목은 config.json의 displayName을 사용하며 계정명은 별도로 표시합니다. 모바일에서 제목 25px, 주요 숫자 42px, 본문 12~14px를 기준으로 배치합니다. 페이지는 site/index.html, site/style.css, site/app.js 세 파일로 구성하며 기록과 수집 설정은 기존대로 사용합니다.
+
+## PC 자동 운영 검증 (2026-11-02)
+
+Windows 작업 DainFollowerTracker-3Hourly를 등록했습니다. 로컬 프로그램이 로그인 없는 새 브라우저에서 숫자를 읽고, Windows 자격 증명 관리자의 GitHub 연결로 기록 파일만 게시합니다. OpenAI 모델과 Codex는 호출하지 않습니다. 실제 예약 실행 경로로 22:13에 773명을 읽고, GitHub push와 Pages 갱신 확인까지 성공했습니다. 일별 기록은 하루 한 건을 유지합니다.
+
+PC의 운영 폴더에 있는 사용안내.md, 상태 확인.cmd, 예약 중지.cmd를 사용하세요. 로그는 state/last-run.json과 state/runs.jsonl에 남습니다. 운영 폴더를 이동하거나 삭제하면 예약이 실행되지 않습니다. GitHub 인증 정보는 저장소나 프로그램 파일에 포함하지 않습니다.
