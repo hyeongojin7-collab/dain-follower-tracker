@@ -7,8 +7,8 @@
   <meta name="referrer" content="no-referrer">
   <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <title>다인공주 팔로워 변화 추이</title>
-  <link rel="stylesheet" href="style.css?v=2">
-  <script defer src="app.js?v=2"></script>
+  <link rel="stylesheet" href="style.css?v=3">
+  <script defer src="app.js?v=3"></script>
 </head>
 <body>
   <main>
@@ -39,7 +39,15 @@
     <section class="panel chart-panel" aria-labelledby="chart-heading">
       <div class="section-heading">
         <h2 id="chart-heading">팔로워 추이</h2>
-        <label class="range-control"><span class="sr-only">표시 기간</span><select id="range"><option value="all">전체 기간</option><option value="30">최근 30일</option><option value="90">최근 90일</option></select></label>
+        <div class="view-switch" role="group" aria-label="그래프 단위">
+          <button type="button" id="view-daily" aria-pressed="true">일별</button>
+          <button type="button" id="view-hourly" aria-pressed="false">시간별</button>
+        </div>
+      </div>
+      <div class="chart-toolbar">
+        <label id="daily-control" class="range-control"><span class="sr-only">표시 기간</span><select id="range"><option value="all">전체 기간</option><option value="30">최근 30일</option><option value="90">최근 90일</option></select></label>
+        <label id="hourly-control" class="date-control" hidden><span class="sr-only">시간별 기록 날짜</span><input type="date" id="hour-date" aria-label="시간별 기록 날짜"></label>
+        <span id="chart-detail" class="chart-detail"></span>
       </div>
       <svg id="chart" role="img" aria-label="날짜별 팔로워 수 그래프. 정확한 값은 아래 기록 표에서 확인할 수 있습니다."></svg>
     </section>
@@ -50,7 +58,7 @@
         <button id="export" type="button"><svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M10 3v9m-3-3 3 3 3-3M4 13v3h12v-3" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>CSV 저장</button>
       </div>
       <div class="table-scroll">
-        <table><thead><tr><th scope="col">날짜</th><th scope="col">팔로워</th><th scope="col">변화</th></tr></thead><tbody id="rows"></tbody></table>
+        <table><thead><tr><th scope="col" id="time-heading">날짜</th><th scope="col">팔로워</th><th scope="col">변화</th></tr></thead><tbody id="rows"></tbody></table>
       </div>
     </section>
   </main>

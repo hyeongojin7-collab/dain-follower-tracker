@@ -81,3 +81,20 @@ td.empty { text-align: center; color: #8a8491; padding: 30px 0; }
   button { transition: background .15s ease; }
 }
 
+
+/* 일별 / 시간별 전환 */
+[hidden] { display: none !important; }
+.view-switch { display: flex; padding: 4px; border-radius: 13px; background: #f2eff7; gap: 3px; }
+.view-switch button { min-height: 36px; min-width: 62px; padding: 0 13px; background: transparent; color: #84788f; border-radius: 10px; font-size: 13px; }
+.view-switch button[aria-pressed="true"] { background: #fff; color: #625072; box-shadow: 0 1px 5px #71608018; }
+.chart-toolbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 0 24px 14px; }
+.chart-detail { font-size: 12px; color: #89828f; text-align: right; }
+.date-control { background: #f4f2f8; border-radius: 11px; min-width: 0; }
+input[type="date"] { font: inherit; font-size: 13px; min-height: 42px; min-width: 0; width: 154px; border: 0; border-radius: 11px; background: transparent; padding: 0 12px; color: #625970; -webkit-appearance: none; }
+#chart .hour-axis { font-size: 11px; }
+@media (max-width: 600px) {
+ .chart-toolbar { padding: 0 20px 12px; }
+ .view-switch button { min-height: 44px; min-width: 54px; padding: 0 10px; }
+ input[type="date"] { min-height: 44px; width: 148px; }
+ .chart-detail { font-size: 11px; }
+}

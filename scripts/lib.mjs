@@ -29,6 +29,14 @@ export async function save(entry,replace=false){
  const rows=validate(JSON.parse(await readFile('site/data/history.json','utf8')));
  if(rows.some(r=>r.targetUsername!==entry.targetUsername))throw new Error('다른 계정 또는 이전 형식의 기록이 있습니다. 계정별로 별도 저장소를 사용하세요.');
  const result=upsert(rows,entry,replace);
- if(result.changed){await writeFile('site/data/history.json.tmp',JSON.stringify(result.rows,null,2)+'\n');await rename('site/data/history.json.tmp','site/data/history.json');}
+ if(result.changed){
+  const {validateHourly,upsertHourly}=await import('./hourly.mjs');
+  let hourly=[];
+  try{hourly=validateHourly(JSON.parse(await readFile('site/data/hourly.json','utf8')));}catch(error){if(error.code!=='ENOENT')throw error;}
+  if(hourly.some(row=>row.targetUsername!==entry.targetUsername))throw new Error('시간별 기록의 계정이 일치하지 않습니다.');
+  const nextHourly=upsertHourly(hourly,entry);
+  await writeFile('site/data/hourly.json.tmp',JSON.stringify(nextHourly,null,2)+'\n');await rename('site/data/hourly.json.tmp','site/data/hourly.json');
+  await writeFile('site/data/history.json.tmp',JSON.stringify(result.rows,null,2)+'\n');await rename('site/data/history.json.tmp','site/data/history.json');
+ }
  console.log(result.changed?'기록을 저장했습니다.':'같은 날짜의 기록이 있어 기존 값을 유지했습니다.');
 }
