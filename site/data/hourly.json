@@ -558,5 +558,13 @@
     "targetUsername": "dxineee",
     "recordedAt": "2026-11-06T15:55:32.333Z",
     "hour": "2026-11-07T00:00:00+09:00"
+  },
+  {
+    "date": "2026-11-07",
+    "followers": 1000,
+    "source": "public-page",
+    "targetUsername": "dxineee",
+    "recordedAt": "2026-11-06T16:01:35.639Z",
+    "hour": "2026-11-07T01:00:00+09:00"
   }
 ]
